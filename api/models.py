@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class Prompt(BaseModel):
-    input: str
+class Description(BaseModel):
+	prompt: str
