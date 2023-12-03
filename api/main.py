@@ -48,7 +48,6 @@ async def generate_image(description: Description):
 		return image_generate(description.prompt)
 	except BadRequestError as e:
 		print(e)
-
 		return HTTPException(
 			status_code=400,
 			code='contentFilter',
