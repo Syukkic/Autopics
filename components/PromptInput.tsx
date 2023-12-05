@@ -5,11 +5,7 @@ import React, { useState } from 'react';
 
 function PromptInput() {
   const [prompt, setPrompt] = useState('');
-  const [imageURL, setImageURL] = useState('');
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setPrompt(e.target.value);
-  };
+  const [imageURLs, setImageURLs] = useState<string[]>([]);
 
   type GPTResponse = {
     created: number;
@@ -18,6 +14,10 @@ function PromptInput() {
       revised_prompt: string;
       url: string;
     }[];
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(e.target.value);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,15 +37,36 @@ function PromptInput() {
         throw new Error('Failed to submit data');
       }
       const data: GPTResponse = await response.json();
-      setImageURL(data.data[0].url);
+      const newImageURL = data.data[0].url;
+      setImageURLs([...imageURLs, newImageURL]);
       setPrompt('');
     } catch (error) {
       console.error(`Error Submitting data: ${error}`);
     }
   };
+
+  const downloadFile = async (imageURL: string, fileName: string) => {
+    fetch(imageURL, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/image',
+      },
+    })
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+      });
+  };
+
   return (
     <>
-      <Image src={imageURL} alt="" width={480} height={480} />
       <div className="m-10">
         <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row shadow-md shadow-slate-400/10 border rounded-md lg:divide-x">
           <textarea value={prompt} onChange={handleInputChange} placeholder="Enter your prompt" className="flex-1 p-4 outline-none rounded-md " />
@@ -57,6 +78,26 @@ function PromptInput() {
             Generate
           </button>
         </form>
+      </div>
+      <div className="container mx-auto px-2 py-2 lg:px-20 lg:pt-20">
+        <div className="-m-1 flex flex-wrap md:-m-2">
+          <div className="grid gap-4 grid-cols-4 grid-rows-4">
+            {imageURLs.length > 0 && (
+              <>
+                {imageURLs.map((url, index) => (
+                  <div key={index} className="relative hover:scale-[105%] transition-transform duration-200 ease-in-out">
+                    <Image key={index} src={url} alt="" width={420} height={420} className="float-right" />
+                    <div className="absolute inset-0 flex justify-center items-center bg-white opacity-0 hover:opacity-80 transition-opacity">
+                      <p className="text-center font-light text-lg p-5">
+                        <button onClick={() => downloadFile(url, `AI-Image-${index}.png`)}>Donwload</button>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </>
   );
