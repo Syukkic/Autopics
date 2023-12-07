@@ -7,13 +7,20 @@ function PromptInput() {
   const [prompt, setPrompt] = useState('');
   const [imageURLs, setImageURLs] = useState<string[]>([]);
 
-  type GPTResponse = {
+  type successResponse = {
     created: number;
     data: {
       b64_json: null | string;
       revised_prompt: string;
       url: string;
     }[];
+  };
+
+  type errorResponse = string;
+
+  type responseType = {
+    status: string;
+    response: successResponse | errorResponse;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -36,10 +43,23 @@ function PromptInput() {
       if (!response.ok) {
         throw new Error('Failed to submit data');
       }
-      const data: GPTResponse = await response.json();
-      const newImageURL = data.data[0].url;
-      setImageURLs([...imageURLs, newImageURL]);
-      setPrompt('');
+
+      const data: responseType = await response.json();
+      console.log(`Type of ${typeof data}`);
+      if (data.status === 'success') {
+        const successData: successResponse = data.response as successResponse;
+        console.log(`successData: ${successData}`);
+        console.log(`successData type is ${typeof successData}`);
+
+        const newImageURL = successData.data[0].url;
+        setImageURLs([...imageURLs, newImageURL]);
+        setPrompt('');
+      } else {
+        const errorMessage: errorResponse = data.response as errorResponse;
+        console.log(`successData: ${errorMessage}`);
+        console.log(`errorMessage type is ${typeof errorMessage}`);
+        alert(errorMessage);
+      }
     } catch (error) {
       console.error(`Error Submitting data: ${error}`);
     }

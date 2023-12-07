@@ -1,17 +1,11 @@
-import json
-import os
-from os.path import dirname, join
-from pathlib import Path
-
-from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
-from openai import AzureOpenAI, BadRequestError
+from fastapi.responses import JSONResponse
 
 from .models import Description
+from .utils import image_generate
 
-dotenv_path = join(dirname(Path(__file__).parent), '.env')
-load_dotenv(dotenv_path)
 app = FastAPI()
 
 app.add_middleware(
@@ -23,19 +17,6 @@ app.add_middleware(
 )
 
 
-def image_generate(prompt: str, size='1024x1024'):
-    client = AzureOpenAI(
-        api_version=os.environ['API_VERSION'],
-        azure_endpoint=os.environ['AZURE_API_ENDPOINT'],
-        api_key=os.environ['AZURE_API_KEY'],
-    )
-
-    # size options: ['256x256', '512x512', '1024x1024', '1792x1024', '1024x1792']
-    response = client.images.generate(model='AutoPic', prompt=prompt, n=1, size=size)
-
-    return json.loads(response.model_dump_json())
-
-
 @app.post('/')
 async def index():
     return {'message': 'hello world'}
@@ -43,11 +24,4 @@ async def index():
 
 @app.post('/api/generate')
 async def generate_image(description: Description):
-    try:
-        return image_generate(description.prompt)
-    except BadRequestError:
-        return HTTPException(
-            status_code=400,
-            code='contentFilter',
-            message='Your task failed as a result of our safety system.',
-        )
+    return JSONResponse(content=jsonable_encoder(image_generate(description.prompt)))
