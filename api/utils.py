@@ -21,36 +21,10 @@ def image_generate(prompt: str, size='1024x1024'):
     try:
         # size options: ['256x256', '512x512', '1024x1024', '1792x1024', '1024x1792']
         response = client.images.generate(model='AutoPic', prompt=prompt, n=1, size=size)
-
-        result = {'status': 'success', 'response': response.model_dump_json()}
-
-        print(result)
-        print(type(result))
-        # return json.loads(response.model_dump_json())
-        return result
-    except BadRequestError as e:
-        # Error code: 400
-        message = ast.literal_eval(str(e).split('- ')[-1])
-        result = {'status': 'error', 'response': message['error']['message']}
-
-        print(result)
-        return json.loads(result)
-    except RateLimitError as e:
-        # Error code: 429
-        message = ast.literal_eval(str(e).split('- ')[-1])
-        result = {'status': 'error', 'response': message['error']['message']}
-
-        print(result)
-        return json.loads(result)
-    except APITimeoutError as e:
-        message = ast.literal_eval(str(e).split('- ')[-1])
-        result = {'status': 'error', 'response': message['error']['message']}
-
-        print(result)
-        return result
-    except APIConnectionError as e:
-        message = ast.literal_eval(str(e).split('- ')[-1])
-        result = {'status': 'error', 'response': message['error']['message']}
-
+        result = {'status': 'success', 'response': json.loads(response.model_dump_json())}
+    except (BadRequestError, APITimeoutError, RateLimitError, APIConnectionError) as e:
+        error_message = ast.literal_eval(str(e).split('- ')[-1])
+        result = {'status': 'error', 'response': error_message['error']['message']}
+    finally:
         print(result)
         return result
