@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import React, { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import { IoMdDownload } from 'react-icons/io';
 
 function PromptInput() {
   const [prompt, setPrompt] = useState('');
@@ -45,20 +47,19 @@ function PromptInput() {
       }
 
       const data: responseType = await response.json();
-      console.log(`Type of ${typeof data}`);
       if (data.status === 'success') {
         const successData: successResponse = data.response as successResponse;
-        console.log(`successData: ${successData}`);
-        console.log(`successData type is ${typeof successData}`);
-
         const newImageURL = successData.data[0].url;
         setImageURLs([...imageURLs, newImageURL]);
+        toast.success('Your AI Arts has been Generated!', {
+          icon: '🥳',
+        });
+
         setPrompt('');
       } else {
         const errorMessage: errorResponse = data.response as errorResponse;
         console.log(`successData: ${errorMessage}`);
-        console.log(`errorMessage type is ${typeof errorMessage}`);
-        alert(errorMessage);
+        toast.error(errorMessage, { icon: '🙀' });
       }
     } catch (error) {
       console.error(`Error Submitting data: ${error}`);
@@ -87,6 +88,7 @@ function PromptInput() {
 
   return (
     <>
+      <Toaster />
       <div className="m-10">
         <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row shadow-md shadow-slate-400/10 border rounded-md lg:divide-x">
           <textarea value={prompt} onChange={handleInputChange} placeholder="Enter your prompt" className="flex-1 p-4 outline-none rounded-md " />
