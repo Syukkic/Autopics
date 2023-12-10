@@ -111,7 +111,9 @@ function PromptInput() {
                     <Image key={index} src={url} alt="" width={420} height={420} className="float-right" />
                     <div className="absolute inset-0 flex justify-center items-center bg-white opacity-0 hover:opacity-80 transition-opacity">
                       <p className="text-center font-light text-lg p-5">
-                        <button onClick={() => downloadFile(url, `AI-Image-${index}.png`)}>Donwload</button>
+                        <button onClick={() => downloadFile(url, `AI-Image-${index}.png`)}>
+                          <IoMdDownload />
+                        </button>
                       </p>
                     </div>
                   </div>
