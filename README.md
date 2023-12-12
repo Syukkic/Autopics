@@ -1,1 +1,1 @@
-種草項目
+AI Arts Generation Powered by DALL·E 2
