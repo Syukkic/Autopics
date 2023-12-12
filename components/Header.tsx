@@ -9,6 +9,7 @@ function Header() {
       </div>
       <div>
         <h1 className="font-bold">AI Arts Generation</h1>
+        <h2 className="text-xs">Powered by DALL·E 2</h2>
       </div>
     </header>
   );
