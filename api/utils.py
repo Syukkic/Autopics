@@ -7,6 +7,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import APIConnectionError, APITimeoutError, AzureOpenAI, BadRequestError, RateLimitError
 
+from .logger import logger
+
 dotenv_path = join(dirname(Path(__file__).parent), '.env')
 load_dotenv(dotenv_path)
 
@@ -26,5 +28,5 @@ def image_generate(prompt: str, size='1024x1024'):
         error_message = ast.literal_eval(str(e).split('- ')[-1])
         result = {'status': 'error', 'response': error_message['error']['message']}
     finally:
-        print(result)
+        logger.info(result)
         return result

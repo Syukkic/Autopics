@@ -3,6 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from .logger import logger
 from .models import Description
 from .utils import image_generate
 
@@ -24,4 +25,5 @@ async def index():
 
 @app.post('/api/generate')
 async def generate_image(description: Description):
+    logger.info(f'prompt: {description.prompt}')
     return JSONResponse(content=jsonable_encoder(image_generate(description.prompt)))
