@@ -32,6 +32,9 @@ function PromptInput() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(`Submitting prompt: ${prompt}`);
+    setPrompt('');
+
+    const notification = toast.loading(`DALL·E 🤖 is generating: ${prompt.slice(0, 20)}...`);
 
     try {
       const response = await fetch('http://127.0.0.1:8000/api/generate', {
@@ -53,13 +56,12 @@ function PromptInput() {
         setImageURLs([...imageURLs, newImageURL]);
         toast.success('Your AI Arts has been Generated!', {
           icon: '🥳',
+          id: notification,
         });
-
-        setPrompt('');
       } else {
         const errorMessage: errorResponse = data.response as errorResponse;
         console.log(`successData: ${errorMessage}`);
-        toast.error(errorMessage, { icon: '🙀' });
+        toast.error(errorMessage, { icon: '🙀', id: notification });
       }
     } catch (error) {
       console.error(`Error Submitting data: ${error}`);
